@@ -1,6 +1,6 @@
 # timerMQTT
 
-Application Windows affichant un timer reçu par MQTT en surimpression, avec configuration et systray.
+Application Windows affichant un timer reçu par MQTT en surimpression, avec configuration et systray.   
 Générer avec Copilot (GPT5 Preview)
 
 ## Dépendances
