@@ -27,8 +27,8 @@ jobs:
       - name: Build executable (PyInstaller)
         run: |
           pyinstaller --noconfirm --clean timerMQTT.spec
-          if (!(Test-Path -Path 'dist/timerMQTT/timerMQTT.exe')) { throw 'Exe not found' }
-          Copy-Item 'dist/timerMQTT/timerMQTT.exe' 'dist/timerMQTT.exe' -Force
+          if (!(Test-Path -Path 'dist/timerMQTT.exe')) { throw 'Exe not found' }
+          Copy-Item 'dist/timerMQTT.exe' 'dist/timerMQTT.exe' -Force
 
       - name: Set version in installer.iss from tag
         shell: pwsh
@@ -58,14 +58,13 @@ jobs:
           $tag = "${{ github.ref_name }}"
           $zip = "dist/timerMQTT-portable-" + $tag + ".zip"
           if (Test-Path $zip) { Remove-Item $zip -Force }
-          Compress-Archive -Path 'dist/timerMQTT/*' -DestinationPath $zip -CompressionLevel Optimal
+          Compress-Archive -Path 'dist/*' -DestinationPath $zip -CompressionLevel Optimal
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: |
-            dist/timerMQTT/timerMQTT.exe
             dist/timerMQTT.exe
             dist/timerMQTT-Setup-*.exe
             dist/timerMQTT-portable-*.zip
@@ -75,7 +74,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/timerMQTT/timerMQTT.exe
+            dist/timerMQTT.exe
             dist/timerMQTT-Setup-*.exe
             dist/timerMQTT-portable-*.zip
         env:
