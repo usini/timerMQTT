@@ -27,7 +27,8 @@ jobs:
       - name: Build executable (PyInstaller)
         run: |
           pyinstaller --noconfirm --clean timerMQTT.spec
-          if (!(Test-Path -Path 'dist/timerMQTT.exe')) { throw 'Exe not found' }
+          if (!(Test-Path -Path 'dist/timerMQTT/timerMQTT.exe')) { throw 'Exe not found' }
+          Copy-Item 'dist/timerMQTT/timerMQTT.exe' 'dist/timerMQTT.exe' -Force
 
       - name: Set version in installer.iss from tag
         shell: pwsh
@@ -48,7 +49,16 @@ jobs:
           & $iscc 'installer.iss'
           if (!(Test-Path -Path 'dist/timerMQTT-Setup.exe')) { throw 'Installer not found' }
           $tag = "${{ github.ref_name }}"
-          Rename-Item 'dist/timerMQTT-Setup.exe' ("dist/timerMQTT-Setup-" + $tag + '.exe') -Force
+          $newName = "timerMQTT-Setup-" + $tag + ".exe"
+          Rename-Item -Path 'dist/timerMQTT-Setup.exe' -NewName $newName -Force
+
+      - name: Create portable ZIP
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $zip = "dist/timerMQTT-portable-" + $tag + ".zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path 'dist/timerMQTT/*' -DestinationPath $zip -CompressionLevel Optimal
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -58,6 +68,7 @@ jobs:
             dist/timerMQTT/timerMQTT.exe
             dist/timerMQTT.exe
             dist/timerMQTT-Setup-*.exe
+            dist/timerMQTT-portable-*.zip
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -66,5 +77,6 @@ jobs:
           files: |
             dist/timerMQTT/timerMQTT.exe
             dist/timerMQTT-Setup-*.exe
+            dist/timerMQTT-portable-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
